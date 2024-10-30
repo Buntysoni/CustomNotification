@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
-using WebApplication3.Models;
+using CustomNotification.Models;
 using WebPush;
 
-namespace WebApplication3.Controllers
+namespace CustomNotification.Controllers
 {
     public class HomeController : Controller
     {

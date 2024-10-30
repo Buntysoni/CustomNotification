@@ -1,4 +1,4 @@
-namespace WebApplication3.Models
+namespace CustomNotification.Models
 {
     public class ErrorViewModel
     {
