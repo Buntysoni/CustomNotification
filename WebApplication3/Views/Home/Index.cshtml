@@ -1,46 +1,125 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <div id="paypal-button-container"></div>
-</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        background-color: #f7f9fc;
+    }
 
-<form id="notificationForm">
-    <input type="text" id="sessionCode" placeholder="Enter Session Code" required />
-    <input type="text" id="title" placeholder="Enter Title" required />
-    <input type="text" id="message" placeholder="Enter Message" required />
-    <button type="button" onclick="sendNotification(false)">Send Notification</button>
-</form>
-<hr />
-<button type="button" onclick="sendNotification(true)">Send All</button>
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary, .btn-secondary {
+        border-radius: 30px;
+    }
+
+    .form-control, .form-label {
+        font-size: 1rem;
+    }
+
+    .header-text {
+        color: #5a67d8;
+        font-weight: 700;
+    }
+
+    .divider {
+        border-top: 1px solid #e0e6ed;
+    }
+
+    .link-text {
+        color: #5a67d8;
+        text-decoration: underline;
+    }
+
+        .link-text:hover {
+            color: #3c4bc9;
+        }
+
+    .highlight-label {
+        background-color: #e9f5ff;
+        padding: 10px 15px;
+        border-left: 4px solid #5a67d8;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #3c4bc9;
+    }
+    </style>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-md-8 col-lg-6">
+        <div class="text-center mb-5">
+            <h3 class="display-7 header-text">Welcome Customer Notification</h3>
+            <p class="lead">Learn about <a href="https://github.com/Buntysoni/CustomNotification" class="link-text">building Web apps with us</a>.</p>
+        </div>
+
+        <div class="card p-5">
+            <form id="notificationForm">
+                <div class="mb-4 highlight-label d-none">
+                    <label id="sessionCodeValue" class="form-label">
+                        Your session code is: <span id="dynamicSessionCode" class="fw-bold"></span>
+                    </label>
+                </div>
+                <div class="mb-4">
+                    <label for="sessionCode" class="form-label">Session Code <i class="fas fa-key ms-1 text-muted"></i></label>
+                    <input type="text" class="form-control" id="sessionCode" placeholder="Enter Session Code" required>
+                </div>
+                <div class="mb-4">
+                    <label for="title" class="form-label">Title <i class="fas fa-heading ms-1 text-muted"></i></label>
+                    <input type="text" class="form-control" id="title" placeholder="Enter Title" required>
+                </div>
+                <div class="mb-4">
+                    <label for="message" class="form-label">Message <i class="fas fa-envelope ms-1 text-muted"></i></label>
+                    <input type="text" class="form-control" id="message" placeholder="Enter Message" required>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-primary" onclick="sendNotification(false)">
+                        <i class="fas fa-paper-plane me-1"></i> Send Notification
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="sendNotification(true)">
+                        <i class="fas fa-users me-1"></i> Send All
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
     subscribeUserToPush();
-    const uniqueSessionCode = generateUniqueCode();
+    var uniqueSessionCode = '';
     async function subscribeUserToPush() {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: 'BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk' //aaabc
-            });
-            const requestBody = JSON.stringify({ subscription, sessionCode: uniqueSessionCode });
-            $.ajax({
-                type: "POST",
-                url: '/Home/Subscribe',
-                data: { requestBody: requestBody },
-                success: function (response) {
-
-                },
-                error: function (xhr, status, error) {
-                    console.warn(error);
-                    alert('error: is here');
+        if (Notification.permission !== "granted") {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                uniqueSessionCode = generateUniqueCode();
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: 'BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk' //aaabc
+                });
+                const highlightLabels = document.getElementsByClassName('highlight-label');
+                for (let i = 0; i < highlightLabels.length; i++) {
+                    highlightLabels[i].classList.remove('d-none');
                 }
-            });
-            console.log('Subscribed:', subscription);
+                document.getElementById('dynamicSessionCode').innerText = uniqueSessionCode;
+                const requestBody = JSON.stringify({ subscription, sessionCode: uniqueSessionCode });
+                $.ajax({
+                    type: "POST",
+                    url: '/Home/Subscribe',
+                    data: { requestBody: requestBody },
+                    success: function (response) {
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.warn(error);
+                        alert('error: is here');
+                    }
+                });
+                console.log('Subscribed:', subscription);
+            }
         }
     }
     function generateUniqueCode() {
@@ -74,3 +153,5 @@
         });
     }
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
