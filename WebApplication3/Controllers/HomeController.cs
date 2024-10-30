@@ -50,7 +50,14 @@ namespace WebApplication3.Controllers
 
                     var payload = JsonSerializer.Serialize(new { title = request.Title, body = request.Message });
 
-                    webPushClient.SendNotification(subscription, payload, vapidDetails);
+                    try
+                    {
+                        webPushClient.SendNotification(subscription, payload, vapidDetails);
+                    }
+                    catch (Exception)
+                    {
+                        //handle error
+                    }
                     return Ok("Notification sent");
                 }
             }
@@ -65,7 +72,14 @@ namespace WebApplication3.Controllers
 
                         var payload = JsonSerializer.Serialize(new { title = request.Title, body = request.Message });
 
-                        webPushClient.SendNotification(subscription, payload, vapidDetails);
+                        try
+                        {
+                            webPushClient.SendNotification(subscription, payload, vapidDetails);
+                        }
+                        catch (Exception)
+                        {
+                            //handle error
+                        }
                     }
                 }
             }
