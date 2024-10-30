@@ -17,19 +17,6 @@ namespace WebApplication3.Controllers
         }
         public IActionResult Index()
         {
-            foreach (var item in subscriptions)
-            {
-                if (subscriptions.TryGetValue(item.Key, out var subscription))
-                {
-                    var vapidDetails = new VapidDetails("mailto:example@yourdomain.com", "BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk", "q52iOg2uc2Td8U0L6m17TSCWWasRmudn7vrb6Gm9lro");
-                    var webPushClient = new WebPushClient();
-
-                    var payload = JsonSerializer.Serialize(new { title = "Notification Title", body = "help1" });
-
-                    webPushClient.SendNotification(subscription, payload, vapidDetails);
-                }
-            }
-            
             return View();
         }
 
@@ -54,15 +41,33 @@ namespace WebApplication3.Controllers
         [HttpPost]
         public IActionResult SendNotification([FromBody] NotificationRequest request)
         {
-            if (subscriptions.TryGetValue(request.SessionCode, out var subscription))
+            if (!request.IsAll)
             {
-                var vapidDetails = new VapidDetails("mailto:example@yourdomain.com", "BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk", "q52iOg2uc2Td8U0L6m17TSCWWasRmudn7vrb6Gm9lro");
-                var webPushClient = new WebPushClient();
+                if (subscriptions.TryGetValue(request.SessionCode, out var subscription))
+                {
+                    var vapidDetails = new VapidDetails("mailto:example@yourdomain.com", "BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk", "q52iOg2uc2Td8U0L6m17TSCWWasRmudn7vrb6Gm9lro");
+                    var webPushClient = new WebPushClient();
 
-                var payload = JsonSerializer.Serialize(new { title = "Notification Title", body = request.Message });
+                    var payload = JsonSerializer.Serialize(new { title = request.Title, body = request.Message });
 
-                webPushClient.SendNotification(subscription, payload, vapidDetails);
-                return Ok("Notification sent");
+                    webPushClient.SendNotification(subscription, payload, vapidDetails);
+                    return Ok("Notification sent");
+                }
+            }
+            else
+            {
+                foreach (var item in subscriptions)
+                {
+                    if (subscriptions.TryGetValue(item.Key, out var subscription))
+                    {
+                        var vapidDetails = new VapidDetails("mailto:example@yourdomain.com", "BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk", "q52iOg2uc2Td8U0L6m17TSCWWasRmudn7vrb6Gm9lro");
+                        var webPushClient = new WebPushClient();
+
+                        var payload = JsonSerializer.Serialize(new { title = request.Title, body = request.Message });
+
+                        webPushClient.SendNotification(subscription, payload, vapidDetails);
+                    }
+                }
             }
             return NotFound("Session not found");
         }
@@ -100,6 +105,8 @@ namespace WebApplication3.Controllers
     public class NotificationRequest
     {
         public string? SessionCode { get; set; }
+        public string? Title { get; set; }
         public string? Message { get; set; }
+        public bool IsAll { get; set; }
     }
 }

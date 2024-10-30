@@ -1,7 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<script src="https://www.paypal.com/sdk/js?client-id=AeL3-xe17eRjD8mjjrWq99vRMkenbjxK-IdFNbMR-hH9wvmS1I2zR65-Kk-kVb4NNT0P4ZqsUWX0FAdi&vault=true&intent=subscription"></script>
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
@@ -10,9 +9,12 @@
 
 <form id="notificationForm">
     <input type="text" id="sessionCode" placeholder="Enter Session Code" required />
+    <input type="text" id="title" placeholder="Enter Title" required />
     <input type="text" id="message" placeholder="Enter Message" required />
-    <button type="submit">Send Notification</button>
+    <button type="button" onclick="sendNotification(false)">Send Notification</button>
 </form>
+<hr />
+<button type="button" onclick="sendNotification(true)">Send All</button>
 
 <script>
     subscribeUserToPush();
@@ -57,8 +59,12 @@
             });
     }
 
-    async function sendNotification() {
-        const requestBody = JSON.stringify({ sessionCode: uniqueSessionCode, message: uniqueSessionCode });
+    async function sendNotification(isAll) {
+        var sessionCode = '';
+        if(document.getElementById('sessionCode').value != ''){
+            sessionCode = document.getElementById('sessionCode').value;
+        }
+        const requestBody = JSON.stringify({ sessionCode: sessionCode, title: document.getElementById('title').value, message: document.getElementById('message').value, isAll: isAll });
         await fetch('/Home/SendNotification', {
             method: 'POST',
             headers: {
