@@ -79,6 +79,9 @@
                     <input type="text" class="form-control" id="message" placeholder="Enter Message" required>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-warning" onclick="subscribeUserToPush()">
+                        <i class="fas fa-paper-plane me-1"></i> Ask Permission
+                    </button>
                     <button type="button" class="btn btn-primary" onclick="sendNotification(false)">
                         <i class="fas fa-paper-plane me-1"></i> Send Notification
                     </button>
@@ -98,11 +101,12 @@
         if (Notification.permission !== "granted") {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
+                debugger;
                 uniqueSessionCode = generateUniqueCode();
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey: 'BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk' //aaabc
+                    applicationServerKey: 'BCrjxLet8V4qp_p9Bp-ENACCp2Su2mcDCXnfqY1nkH8Ir63CMyLr1_FYFv87N6j2EfuC2KQ15EnJ5hYHUSiFfmk' //vapid key
                 });
                 const highlightLabels = document.getElementsByClassName('highlight-label');
                 for (let i = 0; i < highlightLabels.length; i++) {
